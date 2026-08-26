@@ -1,10 +1,13 @@
-#include <containers/vec.hpp>
+#include <containers/vector.hpp>
 #include <iostream>
 
 int main()
 {
-    containers::Buffer b(4);
-    for (std::size_t i = 0; i < b.size(); ++i)
-        b[i] = static_cast<int>(i * i);
-    std::cout << b[3] << '\n';
+    containers::Vector v;
+    for (int i = 0; i < 5; ++i)
+    {
+        v.push_back(i * 10);
+        std::cout << "size " << v.size() << "  cap " << v.capacity() << "\n";
+    }
+    std::cout << v[3] << "\n";
 }
