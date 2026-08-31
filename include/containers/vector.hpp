@@ -46,6 +46,18 @@ namespace containers
             return m_capacity;
         }
 
+    public:
+        // Default constructor initializes an empty vector
+        Vector() = default;
+        // Destructor to free the allocated memory when the Vector object is destroyed
+        ~Vector()
+        {
+            delete[] m_data; // Free the allocated memory
+        }
+        // Delete copy constructor and copy assignment operator to prevent copying
+        Vector(const Vector &) = delete;
+        Vector &operator=(const Vector &) = delete;
+
     private:
         // Replace the current buffer with one twice as large.
         // A heap buffer cannot be resized in place, because the memory directly
@@ -71,9 +83,5 @@ namespace containers
             m_capacity = new_capacity; //    and record its size
         }
     };
-
-    // NOTE: this class has no destructor, so the final buffer is never freed.
-    // That leak is deliberate at this stage - it is the subject of Lesson 6,
-    // where a destructor and RAII fix it. See the reference sheet.
 
 } // namespace containers

@@ -3,11 +3,11 @@
 
 int main()
 {
-    containers::Vector v;
+    containers::Vector a;
     for (int i = 0; i < 5; ++i)
     {
-        v.push_back(i * 10);
-        std::cout << "size " << v.size() << "  cap " << v.capacity() << "\n";
+        a.push_back(i * 10);
+        std::cout << "size " << a.size() << "  cap " << a.capacity() << "\n";
     }
-    std::cout << v[3] << "\n";
-}
+    std::cout << a[3] << "\n";
+} //~vector a; // destructor is called here, freeing the allocated memory
