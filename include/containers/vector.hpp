@@ -54,9 +54,32 @@ namespace containers
         {
             delete[] m_data; // Free the allocated memory
         }
-        // Delete copy constructor and copy assignment operator to prevent copying
-        Vector(const Vector &) = delete;
-        Vector &operator=(const Vector &) = delete;
+        // copy constructor, builds a new vector that duplaicated the other
+        // called by Vector b = a
+
+        Vector(const Vector &other)
+            : m_data(new int[other.m_capacity]),
+              m_size(other.m_size),
+              m_capacity(other.m_capacity)
+        {
+            // Copy the live elements from the other vector to this one
+            for (std::size_t i = 0; i < m_size; i++)
+                m_data[i] = other.m_data[i];
+        }
+
+        Vector &operator=(const Vector &other)
+        {
+            if (this == &other) // 1. Check for self-assignment
+                return *this;
+            int *fresh = new int[other.m_capacity]; // 2. allocate beforwe realeasing
+            for (std::size_t i = 0; i < other.m_size; i++)
+                fresh[i] = other.m_data[i]; // 3. copy the live elements from the other vector to this one
+            delete[] m_data;                // 4. only now release the old buffer, after we have a new one
+            m_data = fresh;
+            m_size = other.m_size;
+            m_capacity = other.m_capacity;
+            return *this; // 5. always for chaining
+        }
 
     private:
         // Replace the current buffer with one twice as large.
