@@ -81,6 +81,37 @@ namespace containers
             return *this; // 5. always for chaining
         }
 
+        // Move constructor: take other's buffer instead of duplicating it.
+        // Called by `Vector b = std::move(a);` and when a function returns a
+        // temporary. No allocation, no copy loop - just four pointer-sized writes.
+        Vector(Vector &&other) noexcept
+            : m_data(other.m_data),
+              m_size(other.m_size),
+              m_capacity(other.m_capacity)
+        {
+            // The half people forget. Without this, other still holds the address,
+            // and its destructor frees the buffer b is now using. Same double free
+            // as Lesson 6, arrived at from the opposite direction.
+            other.m_data = nullptr;
+            other.m_size = 0;
+            other.m_capacity = 0;
+        }
+
+        Vector &operator=(Vector &&other) noexcept
+        {
+            if (this == &other)
+                return *this;      // self-move: without this, we free
+                                   // our own buffer and then adopt it
+            delete[] m_data;       // release what we hold
+            m_data = other.m_data; // adopt theirs
+            m_size = other.m_size;
+            m_capacity = other.m_capacity;
+            other.m_data = nullptr; // and blank them
+            other.m_size = 0;
+            other.m_capacity = 0;
+            return *this;
+        }
+
     private:
         // Replace the current buffer with one twice as large.
         // A heap buffer cannot be resized in place, because the memory directly
