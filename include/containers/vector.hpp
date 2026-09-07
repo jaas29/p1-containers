@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <utility> // std::move
 
 namespace containers
 {
@@ -11,15 +12,16 @@ namespace containers
     //   m_capacity - how many slots that buffer has room for
     //
     // The invariant that must hold after every operation: m_size <= m_capacity.
+    template <typename T>
     class Vector
     {
-        int *m_data = nullptr;      // Pointer to the dynamically allocated array
+        T *m_data = nullptr;        // Pointer to the dynamically allocated array
         std::size_t m_size = 0;     // Current number of elements in the vector
         std::size_t m_capacity = 0; // Current capacity of the vector
 
     public:
         // Append one value to the end.
-        void push_back(int value)
+        void push_back(const T &value)
         {
             // No room left, so buy more before writing. On the very first call
             // m_size and m_capacity are both 0, so this fires immediately and
@@ -31,7 +33,7 @@ namespace containers
             ++m_size;               // exactly one increment: one push, one element
         }
 
-        int &operator[](std::size_t index)
+        T &operator[](std::size_t index)
         {
             return m_data[index];
         }
@@ -58,7 +60,7 @@ namespace containers
         // called by Vector b = a
 
         Vector(const Vector &other)
-            : m_data(new int[other.m_capacity]),
+            : m_data(new T[other.m_capacity]),
               m_size(other.m_size),
               m_capacity(other.m_capacity)
         {
@@ -71,7 +73,7 @@ namespace containers
         {
             if (this == &other) // 1. Check for self-assignment
                 return *this;
-            int *fresh = new int[other.m_capacity]; // 2. allocate beforwe realeasing
+            T *fresh = new T[other.m_capacity]; // 2. allocate beforwe realeasing
             for (std::size_t i = 0; i < other.m_size; i++)
                 fresh[i] = other.m_data[i]; // 3. copy the live elements from the other vector to this one
             delete[] m_data;                // 4. only now release the old buffer, after we have a new one
@@ -123,10 +125,10 @@ namespace containers
             // 0 is a special case because doubling zero is still zero.
             std::size_t new_capacity = (m_capacity == 0) ? 1 : m_capacity * 2;
 
-            int *fresh = new int[new_capacity]; // 1. bigger buffer
+            T *fresh = new T[new_capacity]; // 1. bigger buffer
 
             for (std::size_t i = 0; i < m_size; ++i) // 2. copy the old values
-                fresh[i] = m_data[i];
+                fresh[i] = std::move(m_data[i]);
 
             delete[] m_data; // 3. release the old buffer
             //    (delete[] on nullptr is
