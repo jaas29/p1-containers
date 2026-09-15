@@ -86,5 +86,81 @@ namespace containers
 
             m_buckets = std::move(fresh); // 3. adopt it
         }
+        class iterator
+        {
+            Vector<Vector<Entry>> *m_buckets = nullptr;
+            std::size_t m_bucket = 0; // which bucket
+            std::size_t m_index = 0;  // how far down its chain
+
+            // Leave the position on a real entry, or exactly on the end position
+            // (m_bucket == bucket count). Those are the only two legal states,
+            // so this is called after every move and on construction.
+            void settle()
+            {
+                while (m_bucket < m_buckets->size() &&
+                       m_index >= (*m_buckets)[m_bucket].size())
+                {
+                    ++m_bucket;   // this chain is exhausted, try the next bucket
+                    m_index = 0;
+                }
+            }
+
+        public:
+            // What <algorithm> looks up through std::iterator_traits. Declarations
+            // only - they change nothing at runtime, they make the iterator legible.
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = Entry;
+            using difference_type = std::ptrdiff_t;
+            using pointer = Entry *;
+            using reference = Entry &;
+
+            iterator() = default; // forward iterators must be default-constructible
+
+            iterator(Vector<Vector<Entry>> *buckets, std::size_t bucket, std::size_t index)
+                : m_buckets(buckets), m_bucket(bucket), m_index(index)
+            {
+                settle(); // enforce the invariant on construction
+            }
+
+            Entry &operator*() const { return (*m_buckets)[m_bucket][m_index]; }
+            Entry *operator->() const { return &(*m_buckets)[m_bucket][m_index]; }
+
+            iterator &operator++()
+            {
+                ++m_index;
+                settle();
+                return *this;
+            }
+
+            // Post-increment: returns the old position, so prefer ++it in loops.
+            iterator operator++(int)
+            {
+                iterator before = *this;
+                ++(*this);
+                return before;
+            }
+
+            bool operator==(const iterator &other) const
+            {
+                return m_bucket == other.m_bucket && m_index == other.m_index;
+            }
+            bool operator!=(const iterator &other) const { return !(*this == other); }
+        };
+
+        iterator begin() { return iterator(&m_buckets, 0, 0); }
+        iterator end() { return iterator(&m_buckets, m_buckets.size(), 0); }
+        bool erase(const K &key)
+        {
+            Vector<Entry> &chain = m_buckets[bucket_for(key)];
+            for (std::size_t i = 0; i < chain.size(); ++i)
+                if (chain[i].key == key)
+                {
+                    chain[i] = std::move(chain[chain.size() - 1]); // pull the last one back
+                    chain.pop_back();                              // drop the tail
+                    --m_size;
+                    return true;
+                }
+            return false;
+        }
     };
 }

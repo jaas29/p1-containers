@@ -29,6 +29,13 @@ namespace containers
         T &operator[](std::size_t index) { return m_data[index]; }
         const T &operator[](std::size_t index) const { return m_data[index]; }
 
+        // Forget the last element. Note that it is not destroyed: the buffer came
+        // from new T[], so every slot holds a live object until the whole buffer
+        // is deleted. m_size only records how many the caller cares about.
+        // Precondition: m_size > 0. m_size is unsigned, so popping an empty
+        // Vector wraps it to a huge number rather than going negative.
+        void pop_back() { --m_size; }
+
         using iterator = T *;
         using const_iterator = const T *;
 
