@@ -3,6 +3,7 @@
 #include <utility> // std::move
 #include <algorithm>
 #include <numeric>
+#include <containers/hash_map.hpp>
 
 int main()
 {
@@ -86,6 +87,19 @@ int main()
     const containers::Vector<int> &cv = v; // the const path
     std::cout << "cv[0] " << cv[0]
               << "  count " << std::count(cv.begin(), cv.end(), 30) << "\n";
+
+    containers::HashMap<std::string, int> ages;
+    ages.insert("jose", 21);
+    ages.insert("roy", 45);
+    ages.insert("ada", 36);
+    ages.insert("grace", 85);
+    ages.insert("alan", 41);
+    ages.insert("jose", 22); // overwrite - must NOT become a sixth entry
+
+    if (auto a = ages.find("jose"))
+        std::cout << "jose -> " << *a << "\n";
+    if (!ages.find("nobody"))
+        std::cout << "nobody -> not found\n";
 
     return 0;
 } // every destructor runs here: a, b, c, m (empty), n
