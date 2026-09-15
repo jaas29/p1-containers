@@ -4,18 +4,11 @@
 
 namespace containers
 {
-    // A growable array of ints, built the way std::vector is built internally.
-    //
-    // The whole type is three pieces of state:
-    //   m_data     - the address of a heap buffer (or nullptr if we own nothing)
-    //   m_size     - how many values the caller has actually stored
-    //   m_capacity - how many slots that buffer has room for
-    //
     // The invariant that must hold after every operation: m_size <= m_capacity.
     template <typename T>
     class Vector
     {
-        T *m_data = nullptr;        // Pointer to the dynamically allocated array
+        T *m_data = nullptr;        // Pointer to the heap buffer that holds the elements of the vector
         std::size_t m_size = 0;     // Current number of elements in the vector
         std::size_t m_capacity = 0; // Current capacity of the vector
 
@@ -33,10 +26,17 @@ namespace containers
             ++m_size;               // exactly one increment: one push, one element
         }
 
-        T &operator[](std::size_t index)
-        {
-            return m_data[index];
-        }
+        T &operator[](std::size_t index) { return m_data[index]; }
+        const T &operator[](std::size_t index) const { return m_data[index]; }
+
+        using iterator = T *;
+        using const_iterator = const T *;
+
+        iterator begin() { return m_data; }
+        iterator end() { return m_data + m_size; }
+
+        const_iterator begin() const { return m_data; }
+        const_iterator end() const { return m_data + m_size; }
 
         std::size_t size() const
         {
@@ -127,16 +127,16 @@ namespace containers
 
             T *fresh = new T[new_capacity]; // 1. bigger buffer
 
-            for (std::size_t i = 0; i < m_size; ++i) // 2. copy the old values
+            for (std::size_t i = 0; i < m_size; ++i) // 2. transfer
                 fresh[i] = std::move(m_data[i]);
 
-            delete[] m_data; // 3. release the old buffer
+            delete[] m_data; // 3. release the old one
             //    (delete[] on nullptr is
             //     defined and does nothing,
             //     so the first grow is safe)
 
-            m_data = fresh;            // 4. adopt the new one
-            m_capacity = new_capacity; //    and record its size
+            m_data = fresh; // 4. adopt the new one
+            m_capacity = new_capacity;
         }
     };
 

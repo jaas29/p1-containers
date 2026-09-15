@@ -1,6 +1,8 @@
 #include <containers/vector.hpp>
 #include <iostream>
 #include <utility> // std::move
+#include <algorithm>
+#include <numeric>
 
 int main()
 {
@@ -11,12 +13,12 @@ int main()
         a.push_back(i * 10);
         std::cout << "size " << a.size() << "  cap " << a.capacity() << "\n";
     }
-    std::cout << a[3] << "\n";
+    std::cout << a[4] << "\n";
 
     // --- Copy constructor ---------------------------------------------------
     containers::Vector<int> b = a;
     b[0] = 999;
-    std::cout << "a[0] = " << a[0] << "   b[0] = " << b[0] << "\n";
+    std::cout << "a[0] = " << a[0] << "   b[0] = " << b[0] << "\n"; // changing b[0] must not change a[0]
 
     // --- Copy assignment ----------------------------------------------------
     containers::Vector<int> c;
@@ -67,6 +69,23 @@ int main()
     ocopy[2][3] = 999; // deep copy must be independent one level down
     std::cout << "outer[2][3] = " << outer[2][3]
               << "   ocopy[2][3] = " << ocopy[2][3] << "\n";
+
+    containers::Vector<int> v;
+    for (int x : {50, 20, 40, 10, 30})
+        v.push_back(x);
+
+    std::sort(v.begin(), v.end());
+    for (int x : v)
+        std::cout << x << " "; // range-for, see below
+    std::cout << "\n";
+
+    auto it = std::find(v.begin(), v.end(), 40);
+    std::cout << "found at index " << (it - v.begin()) << "\n";
+    std::cout << "sum " << std::accumulate(v.begin(), v.end(), 0) << "\n";
+
+    const containers::Vector<int> &cv = v; // the const path
+    std::cout << "cv[0] " << cv[0]
+              << "  count " << std::count(cv.begin(), cv.end(), 30) << "\n";
 
     return 0;
 } // every destructor runs here: a, b, c, m (empty), n
