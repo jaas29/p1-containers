@@ -20,10 +20,20 @@
         "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++",
         "CMAKE_CXX_FLAGS": "-g -fno-omit-frame-pointer -fsanitize=address,undefined -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
       }
+    },
+    {
+      "name": "release",
+      "displayName": "Optimized build (Apple clang, -O3) - benchmarking only, no sanitizers",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "dev",  "configurePreset": "dev" },
-    { "name": "asan", "configurePreset": "asan" }
+    { "name": "dev",     "configurePreset": "dev" },
+    { "name": "asan",    "configurePreset": "asan" },
+    { "name": "release", "configurePreset": "release" }
   ]
 }

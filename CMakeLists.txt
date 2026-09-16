@@ -12,3 +12,9 @@ target_compile_options(containers INTERFACE -Wall -Wextra -Wpedantic -Werror)
 
 add_executable(tests tests/main.cpp)
 target_link_libraries(tests PRIVATE containers)
+
+# Benchmarks are a separate executable from the tests, because they answer a
+# different question and need a different build. tests runs under dev/asan for
+# correctness; bench runs under release for timing. Never swap them.
+add_executable(bench tests/bench.cpp)
+target_link_libraries(bench PRIVATE containers)
